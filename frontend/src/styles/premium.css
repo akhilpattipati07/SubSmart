@@ -1,0 +1,428 @@
+
+/* ===== GLOBAL ===== */
+
+body{
+  margin:0;
+  padding:0;
+  background:#030712;
+  color:#fff;
+  font-family:Inter,sans-serif;
+  overflow-x:hidden;
+}
+
+/* ===== LAYOUT ===== */
+
+.layout{
+  display:flex;
+  min-height:100vh;
+  background:
+  radial-gradient(circle at top left,#312e81 0%,transparent 30%),
+  radial-gradient(circle at bottom right,#0ea5e9 0%,transparent 25%),
+  #030712;
+}
+
+.main{
+  flex:1;
+  margin-left:260px;
+  padding:30px;
+}
+
+/* ===== PREMIUM GLASS ===== */
+
+.glass-card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;
+  box-shadow:
+  0 10px 40px rgba(0,0,0,.4),
+  inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* ===== TITLE ===== */
+
+.premium-title{
+  font-size:42px;
+  font-weight:800;
+  letter-spacing:-1px;
+  background:linear-gradient(
+  90deg,
+  #6366f1,
+  #06b6d4,
+  #8b5cf6
+  );
+  background-clip:text;
+  color:transparent;
+}
+
+/* ===== SIDEBAR ===== */
+
+.sidebar{
+  width:260px;
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+
+  background:rgba(10,15,25,.85);
+  backdrop-filter:blur(30px);
+
+  border-right:
+  1px solid rgba(255,255,255,.08);
+
+  padding:25px;
+}
+
+.sidebar-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  padding:15px;
+  margin-bottom:10px;
+
+  border-radius:16px;
+
+  transition:.3s;
+}
+
+.sidebar-item:hover{
+  background:rgba(255,255,255,.08);
+  transform:translateX(6px);
+}
+
+/* ===== KPI CARDS ===== */
+
+.stat-card{
+  overflow:hidden;
+  position:relative;
+
+  transition:.35s;
+}
+
+.stat-card::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+  linear-gradient(
+  135deg,
+  rgba(99,102,241,.25),
+  rgba(14,165,233,.15)
+  );
+
+  opacity:0;
+  transition:.3s;
+}
+
+.stat-card:hover::before{
+  opacity:1;
+}
+
+.stat-card:hover{
+  transform:
+  translateY(-8px)
+  scale(1.02);
+}
+
+/* ===== TABLE ===== */
+
+.table{
+  color:white !important;
+}
+
+.table thead{
+  background:#111827;
+}
+
+.table-hover tbody tr:hover{
+  background:
+  rgba(255,255,255,.05);
+}
+
+/* ===== BUTTONS ===== */
+
+.btn-success{
+  border:none !important;
+
+  background:
+  linear-gradient(
+  135deg,
+  #4f46e5,
+  #06b6d4
+  ) !important;
+
+  border-radius:14px !important;
+
+  transition:.3s !important;
+}
+
+.btn-success:hover{
+  transform:translateY(-2px);
+}
+
+.btn-danger{
+  border-radius:12px !important;
+}
+
+.btn-warning{
+  border-radius:12px !important;
+}
+
+/* ===== SEARCH ===== */
+
+.form-control{
+  background:
+  rgba(255,255,255,.05) !important;
+
+  border:
+  1px solid rgba(255,255,255,.08) !important;
+
+  color:white !important;
+
+  border-radius:16px !important;
+}
+
+.form-control::placeholder{
+  color:#9ca3af;
+}
+
+/* ===== MODAL ===== */
+
+.modal-content{
+  background:#111827 !important;
+  color:white !important;
+
+  border-radius:24px !important;
+  border:none !important;
+}
+
+/* ===== FLOATING BUTTON ===== */
+
+.floating-btn{
+  position:fixed;
+
+  right:30px;
+  bottom:30px;
+
+  width:75px;
+  height:75px;
+
+  border:none;
+  border-radius:50%;
+
+  color:white;
+  font-size:34px;
+
+  background:
+  linear-gradient(
+  135deg,
+  #4f46e5,
+  #06b6d4
+  );
+
+  box-shadow:
+  0 15px 40px rgba(79,70,229,.5);
+
+  z-index:999;
+  transition:.3s;
+}
+
+.floating-btn:hover{
+  transform:
+  scale(1.1)
+  rotate(90deg);
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#111827;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#4f46e5;
+  border-radius:20px;
+}
+
+/* ===== NOTIFICATION CARD ===== */
+
+.notification-card{
+  border-left:4px solid #06b6d4;
+}
+
+/* ===== RENEWAL CARD ===== */
+
+.renewal-card{
+  border-left:4px solid #f59e0b;
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes float{
+  0%{
+    transform:translateY(0px);
+  }
+
+  50%{
+    transform:translateY(-8px);
+  }
+
+  100%{
+    transform:translateY(0px);
+  }
+}
+
+.animate-float{
+  animation:
+  float 3s ease-in-out infinite;
+}
+
+.notification-card{
+  border-left:4px solid #06B6D4;
+}
+
+.notification-card:hover{
+  transform:translateX(5px);
+}
+
+.badge{
+  font-size:12px;
+}
+
+
+/* DARK */
+
+.dark-theme{
+  background:#030712;
+  color:white;
+}
+
+/* LIGHT */
+
+.light-theme{
+  background:#f8fafc;
+  color:#111827;
+}
+
+.light-theme .glass-card{
+  background:
+  rgba(
+    255,
+    255,
+    255,
+    0.8
+  );
+
+  color:#111827;
+
+  border:
+  1px solid
+  rgba(
+    0,
+    0,
+    0,
+    0.05
+  );
+}
+
+.light-theme .table{
+  color:#111827 !important;
+}
+
+.light-theme .sidebar{
+  background:white;
+  color:#111827;
+}
+
+.light-theme .premium-title{
+  color:#4F46E5;
+}
+
+.profile-card{
+  text-align:center;
+}
+
+.profile-card img{
+  transition:.3s;
+}
+
+.profile-card img:hover{
+  transform:scale(1.05);
+}
+
+.badge{
+  font-size:14px;
+}
+
+.timeline-item{
+  display:flex;
+  gap:15px;
+  margin-bottom:25px;
+  align-items:flex-start;
+}
+
+.timeline-dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#4F46E5;
+  margin-top:6px;
+}
+
+.timeline-item h6{
+  margin:0;
+}
+
+.timeline-item small{
+  color:#9ca3af;
+}
+
+.form-select{
+  background:
+  rgba(255,255,255,.05)
+  !important;
+
+  color:white !important;
+
+  border:
+  1px solid
+  rgba(255,255,255,.08)
+  !important;
+
+  border-radius:14px;
+}
+
+.form-select option{
+  background:#111827;
+}
+.renewal-card{
+  border-left:4px solid #10B981;
+}
+
+.calendar-row:hover{
+  background:
+  rgba(255,255,255,.05);
+}
+
+.ai-chat{
+  min-height:300px;
+}
+
+.ai-message{
+  border-radius:15px;
+}
+
+.admin-card{
+  transition:.3s;
+}
+
+.admin-card:hover{
+  transform:translateY(-6px);
+}
