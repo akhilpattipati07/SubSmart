@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Database
+db.sqlite3
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+
+# Build folders
+build/
+dist/
