@@ -1,569 +1,1070 @@
+import React, {
+  useState,
+  useEffect,
+  useContext
+} from "react";
+import { useNavigate } from "react-router-dom";
+import EditSubscriptionModal from "../components/EditSubscriptionModal";
+import Sidebar from "../components/Sidebar";
 import DashboardCards from "../components/DashboardCards";
-import React, { useEffect, useState } from "react";
-import NotificationCenter from "../components/NotificationCenter";
-import RenewalCountdown from "../components/RenewalCountdown";
-import ExportPDF from "../components/ExportPDF";
-import ExportExcel from "../components/ExportExcel";
-import axios from "axios";
-import AIInsights from "../components/AIInsights";
-import HealthScore from "../components/HealthScore";
-import ForecastCard from "../components/ForecastCard";
-import ActivityTimeline from "../components/ActivityTimeline";
-import RecentActivity from "../components/RecentActivity";
-import RenewalCalendar from "../components/RenewalCalendar";
-import UpcomingPayments from "../components/UpcomingPayments";
-import RenewalSummary from "../components/RenewalSummary";
-import AIChat from "../components/AIChat";
-import SavingsAdvisor from "../components/SavingsAdvisor";
+import SubscriptionTable from "../components/SubscriptionTable";
 import FloatingButton from "../components/FloatingButton";
+import "../styles/premium.css";
+import api from "../api/axios";
+import AddSubscriptionModal from "../components/AddSubscriptionModal";
+import { motion } from  "framer-motion";
+import {
+ThemeContext
+}
+from "../components/ThemeContext";
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip,
+  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
   YAxis,
-  ResponsiveContainer,
   CartesianGrid,
+  LineChart,
+  Line,
+   Sector,
 } from "recharts";
 
+
 function Dashboard() {
-  const [subscriptions, setSubscriptions] = useState([]);
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] =
-  useState("All");
 
-  const [statusFilter, setStatusFilter] =
-  useState("All");
+const hour = new Date().getHours();
 
-  const [sortBy, setSortBy] =
-  useState("name");
+const { darkMode } =
+useContext(
+ThemeContext
+);
 
-  const [formData, setFormData] = useState({
-    service_name: "",
-    category: "",
-    cost: "",
-    billing_cycle: "monthly",
-    next_billing_date: "",
-    status: "Active",
-  });
+const greeting =
+hour < 12
+? "Good Morning"
+: hour < 18
+? "Good Afternoon"
+: "Good Evening";
 
-  useEffect(() => {
+const [
+  showNotifications,
+  setShowNotifications
+] = useState(false);
+
+const [activeIndex, setActiveIndex] = useState(null);
+
+const navigate = useNavigate();
+
+const popularServices = [
+  {
+    name: "Netflix",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+  },
+  {
+    name: "YouTube Premium",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png",
+  },
+  {
+    name: "Prime Video",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png",
+  },
+];
+
+const username =
+  localStorage.getItem(
+    "username"
+  ) || "User";
+
+const [search, setSearch] = useState("");
+
+const [showModal, setShowModal] = useState(false);
+
+const [showEditModal, setShowEditModal] =
+  useState(false);
+
+const [selectedSubscription,
+  setSelectedSubscription] =
+  useState(null);
+
+const [subscriptions, setSubscriptions] = useState([]);
+
+
+
+useEffect(() => {
+  fetchSubscriptions();
+}, []);
+
+const [activities, setActivities] = useState([]);
+
+const [showDetails, setShowDetails] = useState(false);
+
+const fetchSubscriptions = async () => {
+
+  try {
+
+    const token =
+      localStorage.getItem("access");
+
+    const response =
+      await api.get(
+        "http://127.0.0.1:8000/api/subscriptions/",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+    setSubscriptions(
+      response.data
+    );
+
+  } catch(error) {
+
+    console.error(error);
+
+  }
+
+};
+
+const handleEdit = (sub) => {
+  setSelectedSubscription(sub);
+  setShowEditModal(true);
+};
+
+const handleUpdateSubscription =
+  async (updatedSub) => {
+
+  try {
+
+    const token =
+      localStorage.getItem("access");
+
+    await api.put(
+      `http://127.0.0.1:8000/api/subscriptions/${updatedSub.id}/`,
+      updatedSub,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+        },
+      }
+    );
+
     fetchSubscriptions();
-  }, []);
+    setActivities((prev) => [
 
-  const fetchSubscriptions = () => {
-    axios.get(
-        "http://127.0.0.1:8000/api/subscriptions/",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${localStorage.getItem(
-                "access"
-              )}`,
-          },
-        }
-      )
-      .then((res) => setSubscriptions(res.data))
-      .catch((err) => console.log(err));
-  };
+{
+action:
+`Updated ${updatedSub.service_name}`,
+time:
+new Date().toLocaleString(),
+},
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+...prev,
 
-  const addSubscription = (e) => {
-    e.preventDefault();
+]);
+  } catch(error) {
 
-    axios.post(
-        "http://127.0.0.1:8000/api/subscriptions/",
-        formData,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${localStorage.getItem(
-                "access"
-              )}`,
-          },
-        }
-      )
-      .then(() => {
-        fetchSubscriptions();
+    console.error(error);
 
-        setFormData({
-          service_name: "",
-          category: "",
-          cost: "",
-          billing_cycle: "monthly",
-          next_billing_date: "",
-          status: "Active",
-        });
-      })
-      .catch((err) => console.log(err));
-  };
+  }
 
-  const deleteSubscription = (id) => {
-    if (!window.confirm("Delete Subscription?")) return;
+};
 
-    axios.delete(
+const handleDelete = async (id) => {
+
+  if (
+    !window.confirm(
+      "Delete Subscription?"
+    )
+  ) return;
+
+  try {
+
+    const token =
+      localStorage.getItem("access");
+
+    const sub =
+subscriptions.find(
+(s) => s.id === id
+);
+
+    await api.delete(
       `http://127.0.0.1:8000/api/subscriptions/${id}/`,
       {
         headers: {
           Authorization:
-            `Bearer ${localStorage.getItem(
-              "access"
-            )}`,
+            `Bearer ${token}`,
         },
       }
-    )
-      .then(() => fetchSubscriptions())
-      .catch((err) => console.log(err));
-  };
+    );
 
-  const totalSpend = subscriptions.reduce(
-    (sum, item) => sum + parseFloat(item.cost || 0),
-    0
+    fetchSubscriptions();
+
+    setActivities((prev) => [
+
+{
+action:
+`Deleted ${sub.service_name}`,
+time:
+new Date().toLocaleString(),
+},
+
+...prev,
+
+]);
+  } catch(error) {
+
+    console.error(error);
+
+  }
+
+};
+
+
+
+const expensive =
+  subscriptions.length > 0
+    ? [...subscriptions].sort(
+        (a, b) =>
+          Number(b.cost) -
+          Number(a.cost)
+      )[0]
+    : null;
+
+const totalSpend = subscriptions.reduce(
+  (sum, sub) =>
+    sum + Number(sub.cost || 0),
+  0
+);
+
+
+
+const COLORS = [
+  "#EC4899", // Neon Pink
+  "#22D3EE", // Cyan
+  "#A78BFA", // Purple
+  "#10B981", // Emerald
+  "#F59E0B", // Amber
+  "#F43F5E", // Rose
+  "#8B5CF6", // Violet
+  "#06B6D4", // Sky
+  "#14B8A6", // Teal
+  "#84CC16", // Lime
+  "#E879F9", // Magenta
+  "#FB7185", // Hot Pink
+];
+
+const categoryData = subscriptions.map(
+  (sub) => ({
+    name: sub.service_name,
+    value: Number(sub.cost)
+  })
+);
+
+
+const savings =
+  Math.round(
+    totalSpend * 0.20
   );
 
-  const activeServices = subscriptions.filter(
-    (item) => item.status === "Active"
-  ).length;
+const forecastData = [
+  {
+    month: "Current",
+    spend: totalSpend,
+  },
+  {
+    month: "Next",
+    spend: Math.round(totalSpend * 1.05),
+  },
+  {
+    month: "Future",
+    spend: Math.round(totalSpend * 1.10),
+  },
+];
 
-  const filteredSubscriptions =
-  subscriptions
-    .filter((sub) =>
-      sub.service_name
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    )
 
-    .filter((sub) =>
-      categoryFilter === "All"
-        ? true
-        : sub.category === categoryFilter
-    )
+const pieData = subscriptions.map((sub) => ({
+  name: sub.service_name,
+  value: Number(sub.cost),
+}));
 
-    .filter((sub) =>
-      statusFilter === "All"
-        ? true
-        : sub.status === statusFilter
-    )
+const monthlyData =
+  subscriptions.map(
+    (sub, index) => ({
+      month: `S${index + 1}`,
+      spend: Number(sub.cost),
+    })
+  );
 
-    .sort((a,b)=>{
 
-      if(sortBy==="cost"){
-        return b.cost-a.cost;
+
+
+
+const handleAddSubscription = async (newSub) => {
+
+  console.log("Sending:", newSub);
+
+  try {
+
+    const token = localStorage.getItem("access");
+
+    const response = await api.post(
+      "http://127.0.0.1:8000/api/subscriptions/",
+      newSub,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      return a.service_name.localeCompare(
-        b.service_name
+    console.log("Success:", response.data);
+
+    fetchSubscriptions();
+    setActivities((prev) => [
+
+{
+action:
+`Added ${newSub.service_name}`,
+time:
+new Date().toLocaleString(),
+},
+
+...prev,
+
+]);
+
+  } catch (error) {
+
+    console.log("ERROR:");
+
+    if (error.response) {
+      console.log(error.response.data);
+      alert(JSON.stringify(error.response.data));
+    } else {
+      console.log(error);
+    }
+
+  }
+
+
+};
+
+const expiringSoon =
+  subscriptions.filter((sub) => {
+
+    const renewalDate =
+      new Date(
+        sub.next_billing_date
       );
 
-    });
+    const today =
+      new Date();
 
-  const chartData = subscriptions.map((sub) => ({
-    name: sub.service_name,
-    value: Number(sub.cost),
-  }));
+    const diff =
+      Math.ceil(
+        (
+          renewalDate -
+          today
+        ) /
+        (
+          1000 * 60 * 60 * 24
+        )
+      );
 
-  const COLORS = [
-    "#4F46E5",
-    "#06B6D4",
-    "#10B981",
-    "#F59E0B",
-    "#EF4444",
-  ];
+    return diff <= 3 && diff >= 0;
+
+  });
+
+
+const renderActiveShape = (props) => {
 
   return (
-    <>
-      <div className="container-fluid p-4">
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Subscription Dashboard</h2>
+    <Sector
+      {...props}
+      outerRadius={props.outerRadius + 10}
+    />
+  );
 
-          <button
-            className="btn btn-success"
-            data-bs-toggle="modal"
-            data-bs-target="#addModal"
-          >
-            + Add Subscription
-          </button>
-        </div>
+};
 
-        {/* Dashboard Cards */}
-        <DashboardCards subscriptions={subscriptions} />
 
-        <div className="row">
 
-          <div className="col-md-4">
-            <HealthScore
-              subscriptions={subscriptions}
-            />
-          </div>
 
-          <div className="col-md-4">
-            <ForecastCard
-              subscriptions={subscriptions}
-            />
-          </div>
+  
 
-          <div className="col-md-4">
-            <AIInsights
-              subscriptions={subscriptions}
-            />
-          </div>
+return ( 
 
-      ` </div>
+  <div
+  className={
+    darkMode
+      ? "dashboard-bg"
+      : "dashboard-bg light-dashboard"
+  }
+>
 
-        {/* Stats */}
-        <div className="row mb-4">
-          <div className="col-md-6">
-            <div className="card shadow">
-              <div className="card-body text-center">
-                <h6>Monthly Spend</h6>
-                <h2>₹{totalSpend}</h2>
-              </div>
-            </div>
-          </div>
+<div className="layout">
 
-          <div className="col-md-6">
-            <div className="card shadow">
-              <div className="card-body text-center">
-                <h6>Active Services</h6>
-                <h2>{activeServices}</h2>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Charts */}
-        <div className="row mb-4">
-          <div className="col-md-6">
-            <div className="card p-3 shadow">
-              <h5>Cost Distribution</h5>
+  <Sidebar />
 
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="value"
-                    outerRadius={100}
-                    label
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell
-                        key={index}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
+  <div className="main">
 
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+    <div className="top-header">
 
-          <div className="col-md-6">
-            <div className="card p-3 shadow">
-              <h5>Cost Comparison</h5>
+  <div>
 
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#4F46E5" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+    
+    <motion.h1
+  className={
+    darkMode
+      ? "premium-title"
+      : "light-welcome-title"
+  }
+  initial={{
+    opacity:0,
+    x:-50
+  }}
+  animate={{
+    opacity:1,
+    x:0
+  }}
+  transition={{
+    duration:1
+  }}
+>
+  {greeting}, {username} 👋
+</motion.h1>
 
-        {/* Notifications */}
-        <NotificationCenter
-        subscriptions={subscriptions}
-        />
+<p className="welcome-subtitle">
+{subscriptions.length} Active Subscription
+</p>
 
-        {/* Renewal Countdown */}
-        <RenewalCountdown
-        subscriptions={subscriptions}
-        />
+<p className="welcome-savings">
+₹{savings} Potential Savings
+</p>
 
-        {/* Export Buttons */}
-        <div className="mt-4 mb-4">
-        <ExportPDF
-            subscriptions={subscriptions}
-        />
 
-        <ExportExcel
-            subscriptions={subscriptions}
-        />
-        </div>
+    
 
-        <div className="row mt-4">
+    
 
-          <div className="col-md-6">
-            <ActivityTimeline />
-          </div>
+  </div>
+  <input
+  type="text"
+  className="search-bar"
+  placeholder="Search subscriptions..."
+  value={search}
+  onChange={(e) =>
+    setSearch(e.target.value)
+  }
+/>
 
-          <div className="col-md-6">
-            <RecentActivity />
-          </div>
+  <div
+  className="notification-icon"
+  style={{
+    position: "relative"
+  }}
+>
+  <span
+    style={{
+      cursor: "pointer",
+      fontSize: "28px"
+    }}
+    onClick={() =>
+      setShowNotifications(
+        !showNotifications
+      )
+    }
+  >
+    🔔
+    </span>
 
-        </div>
+    <span className="premium-notification-count">
 
-        <div className="row mt-4">
+    {subscriptions.length}
 
-          <div className="col-md-4">
-            <UpcomingPayments
-              subscriptions={subscriptions}
-            />
-          </div>
+  </span>
 
-          <div className="col-md-4">
-            <RenewalSummary
-              subscriptions={subscriptions}
-            />
-          </div>
+  {
+showNotifications && (
 
-          <div className="col-md-4">
-            <ForecastCard
-              subscriptions={subscriptions}
-            />
-          </div>
+<div
+  className="notification-dropdown"
+>
+  {
+    subscriptions.length > 0 ?
 
-        </div>
+    subscriptions.map((sub) => (
 
-        <div className="mt-4">
-
-          <RenewalCalendar
-            subscriptions={subscriptions}
-          />
-
-        <div className="mt-4">
-
-          <RenewalCalendar
-            subscriptions={subscriptions}
-          />
-
-        </div>
-
-        <div className="mt-4">
-          <SavingsAdvisor
-            subscriptions={subscriptions}
-          />
-        </div>
-
-        <div className="mt-4">
-          <AIChat
-            subscriptions={subscriptions}
-          />
-        </div>
+      <div
+        key={sub.id}
+        className="notification-item"
+      >
         
-        <div className="mt-4">
-          <AIChat
-            subscriptions={subscriptions}
-          />
 
-        </div>
+  <div>
+    🔔
+  </div>
 
-        </div>
+  <div>
 
-        {/* Search */}
-        <div className="row mb-4">
+    <strong>
+      {sub.service_name}
+    </strong>
 
-            <div className="col-md-4">
+    <br />
 
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search Service..."
-                value={search}
-                onChange={(e)=>
-                  setSearch(e.target.value)
-                }
-              />
+    <small>
+      Renews on
+      {" "}
+      {sub.next_billing_date}
+    </small>
 
-            </div>
+  </div>
 
-            <div className="col-md-3">
+</div>
+      
 
-              <select
-                className="form-select"
-                value={categoryFilter}
-                onChange={(e)=>
-                  setCategoryFilter(
-                    e.target.value
-                  )
-                }
-              >
+    ))
 
-                <option>All</option>
-                <option>Entertainment</option>
-                <option>Music</option>
-                <option>Education</option>
-                <option>Cloud</option>
+    :
 
-              </select>
+    <p>
+      No Notifications 🎉
+    </p>
+  }
+</div>
 
-            </div>
+)
+}
 
-            <div className="col-md-2">
+  <div className="user-chip">
 
-              <select
-                className="form-select"
-                value={statusFilter}
-                onChange={(e)=>
-                  setStatusFilter(
-                    e.target.value
-                  )
-                }
-              >
+  <div className="premium-avatar">
+    {username?.charAt(0).toUpperCase()}
+  </div>
 
-                <option>All</option>
-                <option>Active</option>
-                <option>Inactive</option>
+  <div className="user-info">
 
-              </select>
+    <h5>{username}</h5>
 
-            </div>
+    <span className="premium-badge">
+      ✨ Premium Member
+    </span>
 
-            <div className="col-md-3">
+    
 
-              <select
-                className="form-select"
-                value={sortBy}
-                onChange={(e)=>
-                  setSortBy(
-                    e.target.value
-                  )
-                }
-              >
 
-                <option value="name">
-                  Sort By Name
-                </option>
 
-                <option value="cost">
-                  Sort By Cost
-                </option>
+  </div>
+ 
+</div>
+</div>
+  <button
+    className="premium-btn"
+    onClick={() =>
+      setShowModal(true)
+    }
+  >
+    + Add Subscription
+  </button>
 
-              </select>
+</div>
 
-            </div>
+    
+ {expiringSoon.length > 0 && (
 
-        </div>
+<div
+  className="alert alert-warning mb-4"
+>
 
-        {/* Table */}
-        <div className="card shadow">
-          <div className="card-body">
-            <table className="table table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>Service</th>
-                  <th>Category</th>
-                  <th>Cost</th>
-                  <th>Billing</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
+  <h5>
+    ⚠ Upcoming Renewals
+  </h5>
 
-              <tbody>
-                {filteredSubscriptions.map((sub) => (
-                  <tr key={sub.id}>
-                    <td>{sub.service_name}</td>
-                    <td>{sub.category}</td>
-                    <td>₹{sub.cost}</td>
-                    <td>{sub.billing_cycle}</td>
-                    <td>{sub.status}</td>
+  {
+    expiringSoon.map(
+      (sub) => (
 
-                    <td>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => deleteSubscription(sub.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div key={sub.id}>
 
-        {/* Modal */}
-        <div
-          className="modal fade"
-          id="addModal"
-          tabIndex="-1"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Add Subscription</h5>
-              </div>
-
-              <div className="modal-body">
-                <input
-                  className="form-control mb-2"
-                  placeholder="Service Name"
-                  name="service_name"
-                  value={formData.service_name}
-                  onChange={handleChange}
-                />
-
-                <input
-                  className="form-control mb-2"
-                  placeholder="Category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                />
-
-                <input
-                  type="number"
-                  className="form-control mb-2"
-                  placeholder="Cost"
-                  name="cost"
-                  value={formData.cost}
-                  onChange={handleChange}
-                />
-
-                <input
-                  type="date"
-                  className="form-control mb-2"
-                  name="next_billing_date"
-                  value={formData.next_billing_date}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  className="btn btn-success"
-                  onClick={addSubscription}
-                >
-                  Save Subscription
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <FloatingButton />
+        {sub.service_name}
+        renews on
+        {sub.next_billing_date}
 
       </div>
-    </>
-  );
+
+    ))
+  }
+
+</div>
+
+)}
+
+{subscriptions.length === 0 && (
+
+<div className="popular-services-card">
+
+  <h4>Popular Services</h4>
+
+  <div className="popular-services">
+
+    {popularServices.map((service) => (
+
+      <div
+        key={service.name}
+        className="service-logo-card"
+      >
+        <img
+          src={service.logo}
+          alt={service.name}
+        />
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+
+)}
+    
+
+    <DashboardCards
+      subscriptions={subscriptions}
+    />
+
+    <div className="dashboard-grid">
+
+      <div>
+
+        <div
+className="chart-section"
+style={{
+display:"flex",
+gap:"20px"
+}}
+>
+
+          
+
+   <div
+className="glass-card p-4"
+style={{
+flex: 1
+}}
+>   
+
+  <h4>Spending Overview</h4>
+
+  <div
+className="spending-layout"
+style={{
+display:"flex",
+alignItems:"center",
+justifyContent:"center",
+gap:"30px"
+}}
+>
+    {/* Donut Chart */}
+    <div
+className="chart-side"
+onClick={() =>
+setShowDetails(
+!showDetails
+)
+}
+style={{
+cursor:"pointer",
+flex:1
+}}
+>
+
+      <div className="donut-wrapper">
+
+  <ResponsiveContainer
+    width="100%"
+    height={280}
+  >
+    <PieChart>
+
+      
+
+      <Pie
+  activeIndex={activeIndex}
+  activeShape={renderActiveShape}
+  data={categoryData}
+  stroke="rgba(255,255,255,0.08)"
+strokeWidth={1}
+  dataKey="value"
+  innerRadius={70}
+  outerRadius={125}
+  onMouseEnter={(_, index) =>
+    setActiveIndex(index)
+  }
+  onMouseLeave={() =>
+    setActiveIndex(null)
+  }
+>
+        {categoryData.map((entry,index)=>(
+  <Cell
+    key={index}
+    fill={COLORS[index % COLORS.length]}
+    stroke="rgba(255,255,255,0.15)"
+    strokeWidth={2}
+  />
+))}
+      
+      </Pie>
+
+    </PieChart>
+  </ResponsiveContainer>
+
+  
+
+
+
+  <div className="donut-center">
+
+  <h2>₹{totalSpend}</h2>
+
+
+    <span>Total</span>
+
+  </div>
+
+</div>
+
+    </div>
+
+    {/* Details */}
+    {
+showDetails && (
+
+<motion.div
+  className="chart-details"
+  initial={{
+    opacity:0,
+    x:50
+  }}
+  animate={{
+    opacity:1,
+    x:0
+  }}
+  transition={{
+    duration:0.4
+  }}
+  
+>
+
+      {categoryData.map((item,index)=>{
+
+        const percentage =
+          (
+            item.value /
+            totalSpend
+          ) * 100;
+
+        return(
+
+          <div
+            className="legend-row"
+            key={index}
+          >
+
+            <div className="legend-left">
+
+              <span
+                className="legend-dot"
+                style={{
+                  background:
+                    COLORS[
+                      index %
+                      COLORS.length
+                    ]
+                }}
+              />
+
+              <span>
+                {item.name}
+              </span>
+
+            </div>
+
+            <div className="legend-right">
+
+              ₹{item.value}
+
+              {" "}
+
+              {percentage.toFixed(0)}%
+
+            </div>
+
+          </div>
+
+        );
+
+      })}
+
+    </motion.div>
+
+    )
+}
+
+  </div>
+
+</div>
+
+         {
+!showDetails && (
+
+<div
+className="dashboard-card p-4"
+style={{
+flex: 1
+}}
+>
+
+            <h4 className="mb-4">
+              Monthly Trend
+            </h4>
+
+            <ResponsiveContainer
+              width="100%"
+              height={250}
+            >
+              <LineChart data={monthlyData}>
+
+  <CartesianGrid
+    strokeDasharray="3 3"
+  />
+
+  <XAxis dataKey="month" />
+
+  <YAxis />
+
+  <Tooltip />
+
+  <Line
+    type="monotone"
+    dataKey="spend"
+    stroke="#6366F1"
+    strokeWidth={4}
+  />
+
+</LineChart>
+            </ResponsiveContainer>
+
+          </div>
+
+          )
+}
+
+        </div>
+
+
+        
+
+<div className="glass-card p-4 mt-4">
+
+  <h4>
+    📈 Spending Forecast
+  </h4>
+
+  <ResponsiveContainer
+    width="100%"
+    height={220}
+  >
+
+    <LineChart
+      data={forecastData}
+    >
+
+      <XAxis dataKey="month" />
+
+      <YAxis />
+
+      <Tooltip />
+
+      <Line
+        type="monotone"
+        dataKey="spend"
+        stroke="#6366F1"
+        strokeWidth={4}
+      />
+
+    </LineChart>
+
+  </ResponsiveContainer>
+
+</div>
+
+
+              <SubscriptionTable
+  subscriptions={subscriptions}
+  search={search}
+  setSearch={setSearch}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+ 
+
+      </div>
+
+      <div className="right-panel">
+
+        <div className="dashboard-card p-4">
+          <h4>
+            Upcoming Renewals
+          </h4>
+
+         {subscriptions.map((sub) => (
+
+  <div
+    key={sub.id}
+    className="mb-3"
+  >
+
+    <strong>
+      {sub.service_name}
+    </strong>
+
+    <br />
+
+    <small>
+      Renewal:
+      {sub.next_billing_date}
+    </small>
+
+  </div>
+
+))}
+
+        </div>
+
+        
+
+        <div className="dashboard-card p-4">
+
+          <h4>
+  ⚡ Recent Activity
+</h4> 
+
+         
+          {activities.slice(0,10).map((item,index)=>(
+
+
+<div
+key={index}
+className="activity-item"
+>
+
+<div>
+
+<strong>
+{item.action}
+</strong>
+
+</div>
+
+<small>
+
+{item.time}
+
+</small>
+
+</div>
+
+))}
+
+  
+
+
+
+        </div>
+
+
+      <div className="dashboard-card p-4 ai-advisor">
+
+  <h4>
+    🤖 AI Savings Advisor
+  </h4>
+
+  <p>
+    Highest Cost Service:
+    {" "}
+    {
+      expensive?.service_name || "N/A"
+    }
+  </p>
+
+  <p>
+    Monthly Spend: ₹{totalSpend}
+  </p>
+
+  <p>
+    Potential Savings: ₹{savings}
+  </p>
+
+  <hr />
+
+  <p
+    style={{
+      color:"#10B981",
+      fontWeight:"bold"
+    }}
+  >
+    Recommendation
+  </p>
+
+  <p>
+    Review unused subscriptions and
+    consider annual plans to reduce costs.
+  </p>
+
+</div>
+
+      </div>
+
+    </div>
+
+  </div>
+      <FloatingButton
+  onClick={() => setShowModal(true)}
+/>
+
+<AddSubscriptionModal
+  show={showModal}
+  onClose={() => setShowModal(false)}
+  onAdd={handleAddSubscription}
+/>
+
+<EditSubscriptionModal
+  show={showEditModal}
+  subscription={selectedSubscription}
+  onClose={() =>
+    setShowEditModal(false)
+  }
+  onSave={
+    handleUpdateSubscription
+  }
+/>
+
+</div>
+
+</div>
+
+
+);
 }
 
 export default Dashboard;

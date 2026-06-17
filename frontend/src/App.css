@@ -36,3 +36,221 @@
     transform: rotate(360deg);
   }
 }
+.glass-card{
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover{
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0,255,255,.25);
+}
+
+.btn{
+  transition: all 0.3s ease;
+}
+
+.btn:hover{
+  transform: scale(1.05);
+}
+
+.profile-image{
+  transition: all 0.3s ease;
+}
+
+.profile-image:hover{
+  transform: scale(1.08);
+}
+
+.progress-bar{
+  animation: growBar 2s ease;
+}
+
+@keyframes growBar{
+
+  from{
+    width:0;
+  }
+
+}
+
+.stats-card{
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover{
+  transform: translateY(-10px);
+  box-shadow: 0 0 30px rgba(99,102,241,0.4);
+}
+
+.page-animation{
+  animation: fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+
+  from{
+    opacity:0;
+    transform:translateY(30px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+}
+
+
+.notification-card{
+  transition: all .3s ease;
+}
+
+.notification-card:hover{
+  transform: translateX(8px);
+  border-left: 5px solid #06B6D4;
+}
+
+.form-control{
+  transition: all .3s ease;
+}
+
+.form-control:focus{
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(6,182,212,.4);
+}
+
+.floating-card{
+  animation:
+    floating 4s ease-in-out infinite;
+}
+
+@keyframes floating{
+
+  0%{
+    transform:
+      translateY(0);
+  }
+
+  50%{
+    transform:
+      translateY(-8px);
+  }
+
+  100%{
+    transform:
+      translateY(0);
+  }
+
+}
+
+.animated-gradient{
+  background-size: 400% 400%;
+  animation:
+    gradientMove 10s ease infinite,
+    floating 4s ease-in-out infinite;
+}
+
+@keyframes gradientMove{
+
+  0%{
+    background-position:0% 50%;
+  }
+
+  50%{
+    background-position:100% 50%;
+  }
+
+  100%{
+    background-position:0% 50%;
+  }
+
+}
+
+.glow-card{
+  position:relative;
+  overflow:hidden;
+}
+
+.glow-card::before{
+
+  content:"";
+
+  position:absolute;
+
+  top:-50%;
+  left:-50%;
+
+  width:200%;
+  height:200%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.15),
+      transparent
+    );
+
+  transform:rotate(25deg);
+
+  animation:
+    shine 5s linear infinite;
+}
+
+@keyframes shine{
+
+  from{
+    transform:
+      translateX(-100%)
+      rotate(25deg);
+  }
+
+  to{
+    transform:
+      translateX(100%)
+      rotate(25deg);
+  }
+
+}
+
+.glass-card{
+
+  background:
+    rgba(255,255,255,.08);
+
+  backdrop-filter:
+    blur(15px);
+
+  border:
+    1px solid
+    rgba(255,255,255,.1);
+
+  border-radius:24px;
+
+  transition:
+    all .3s ease;
+}
+
+.floating-card{
+  transition: all 0.3s ease;
+}
+
+.floating-card:hover{
+  transform: translateY(-8px);
+  box-shadow:
+    0 15px 35px rgba(0,255,255,.25);
+}
+
+.dashboard-bg{
+
+  min-height:100vh;
+
+  background:
+  radial-gradient(
+    circle at top left,
+    #172554,
+    #020617,
+    #000000
+  );
+
+}

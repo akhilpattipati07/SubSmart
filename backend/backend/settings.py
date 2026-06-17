@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'subscriptions',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
     
 ]
@@ -154,3 +156,16 @@ EMAIL_HOST_USER = "akhilpattipati07@gmail.com"
 EMAIL_HOST_PASSWORD = "ijsuquxpwrwqhnht"
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"
+
+SIMPLE_JWT = {
+
+    "ACCESS_TOKEN_LIFETIME":
+        timedelta(hours=12),
+
+    "REFRESH_TOKEN_LIFETIME":
+        timedelta(days=7),
+}

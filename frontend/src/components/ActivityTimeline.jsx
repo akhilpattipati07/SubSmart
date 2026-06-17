@@ -2,24 +2,24 @@ import React from "react";
 
 function ActivityTimeline() {
 
-  const activities = [
-    {
-      action:"Added Netflix",
-      time:"2 minutes ago"
-    },
-    {
-      action:"Updated Spotify",
-      time:"1 hour ago"
-    },
-    {
-      action:"Deleted Prime Video",
-      time:"Yesterday"
-    },
-    {
-      action:"Exported PDF Report",
-      time:"2 days ago"
-    }
-  ];
+  // const activities = [
+  //   {
+  //     action:"Added Netflix",
+  //     time:"2 minutes ago"
+  //   },
+  //   {
+  //     action:"Updated Spotify",
+  //     time:"1 hour ago"
+  //   },
+  //   {
+  //     action:"Deleted Prime Video",
+  //     time:"Yesterday"
+  //   },
+  //   {
+  //     action:"Exported PDF Report",
+  //     time:"2 days ago"
+  //   }
+  // ];
 
   return (
     <div className="glass-card p-4">
